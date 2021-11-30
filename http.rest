@@ -1,5 +1,5 @@
-GET http://localhost:6666/
+GET http://localhost:5000/
 ###
-PUT http://localhost:6666/shortener/1
+PUT http://localhost:5000/shortener/1
 ###
-GET http://localhost:6666/buat?url=http://fb.me/ruhiyatnacucu
+GET http://localhost:5000/buat?url=http://fb.me/ruhiyatnacucu
