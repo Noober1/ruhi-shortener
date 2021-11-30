@@ -27,32 +27,33 @@ router.get('/', (req,res) => {
 router
 	.route('/buat')
 	.get(async(req,res,next) => {
+		const {permalink, url} = req.query
 		try {
-			let permalink = ''
-			if (!req.query.url) {
+			let generatedPermalink = ''
+			if (typeof url == 'undefined') {
 				throw new Error('URL tidak valid')
 			}
 			
-			if (req?.query?.permalink) {
+			if (typeof permalink !== 'undefined') {
 				const isPermalinkExist = await urls.findOne({
-					permalink: req.query.permalink
+					permalink: permalink
 				})
 				if (isPermalinkExist) {
 					throw new Error('Permalink sudah dipakai')
 				}
-				permalink = req.query.permalink
+				generatedPermalink = permalink
 			} else {
-				permalink = await generatePermalink()
+				generatedPermalink = await generatePermalink()
 			}
 			
 			const dataToInsert = await schema.validateAsync({
 				url: req.query.url,
-				permalink: permalink,
+				permalink: generatedPermalink,
 				dateCreated: new Date()
 			})
 
 			const inserting = await urls.insert(dataToInsert)
-			return res.send(`Berhasil dibuat, url: ${process.env.BASE_URL}/${permalink}`)
+			return res.send(`Berhasil dibuat, url: ${process.env.BASE_URL}/${generatedPermalink}`)
 		} catch (error) {
 			next(error)
 		}
