@@ -58,13 +58,13 @@ router
 			})
 
 			const inserting = await urls.insert(dataToInsert)
-
-			const generateQR = await QRCode.toDataURL(generatedPermalink)
+			const resultURL = `${process.env.BASE_URL}/${generatedPermalink}`
+			const generateQR = await QRCode.toDataURL(resultURL)
 
 			// return res.send(`Berhasil dibuat, url: ${process.env.BASE_URL}/${generatedPermalink}, gambar = ${generateQR}`)
 			return res.render('buat', {
 				generated:true,
-				url: `${process.env.BASE_URL}/${generatedPermalink}`,
+				url: resultURL,
 				QRUrl: generateQR
 			})
 		} catch (error) {
