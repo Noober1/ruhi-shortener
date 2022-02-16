@@ -5,6 +5,7 @@ const db = monk(process.env.MONGO_URI)
 const urls = db.get('urls')
 const schema = require('../lib/schema');
 const router = express.Router();
+const QRCode = require('qrcode')
 
 const generatePermalink = async() => {
 	const generateString = randomString(7)
@@ -27,14 +28,18 @@ router.get('/', (req,res) => {
 router
 	.route('/buat')
 	.get(async(req,res,next) => {
-		const {permalink, url} = req.query
+		return res.render('buat')
+	})
+	.post(async(req,res,next) => {
+		const {permalink, url} = req.body
+		console.log('body', req.body)
 		try {
 			let generatedPermalink = ''
 			if (typeof url == 'undefined') {
 				throw new Error('URL tidak valid')
 			}
 			
-			if (typeof permalink !== 'undefined') {
+			if (permalink) {
 				const isPermalinkExist = await urls.findOne({
 					permalink: permalink
 				})
@@ -47,13 +52,21 @@ router
 			}
 			
 			const dataToInsert = await schema.validateAsync({
-				url: req.query.url,
+				url: url,
 				permalink: generatedPermalink,
 				dateCreated: new Date()
 			})
 
 			const inserting = await urls.insert(dataToInsert)
-			return res.send(`Berhasil dibuat, url: ${process.env.BASE_URL}/${generatedPermalink}`)
+
+			const generateQR = await QRCode.toDataURL(generatedPermalink)
+
+			// return res.send(`Berhasil dibuat, url: ${process.env.BASE_URL}/${generatedPermalink}, gambar = ${generateQR}`)
+			return res.render('buat', {
+				generated:true,
+				url: `${process.env.BASE_URL}/${generatedPermalink}`,
+				QRUrl: generateQR
+			})
 		} catch (error) {
 			next(error)
 		}
